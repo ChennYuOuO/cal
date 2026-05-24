@@ -1,0 +1,402 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Microsoft JhengHei", Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 0;
+    color: #2c3e50;
+}
+
+.container {
+    width: min(92%, 1100px);
+    margin: 30px auto;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    text-align: center;
+    margin: 0 0 28px;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+h2 {
+    margin-top: 30px;
+    color: #34495e;
+    border-left: 6px solid #3498db;
+    padding-left: 10px;
+}
+
+h3 {
+    margin: 0;
+    color: #34495e;
+}
+
+label {
+    display: block;
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+input[readonly] {
+    background-color: #eeeeee;
+}
+
+button {
+    margin-top: 15px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    background-color: #3498db;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+}
+
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.danger-btn {
+    background-color: #e74c3c;
+}
+
+.danger-btn:hover {
+    background-color: #c0392b;
+}
+
+.success-btn {
+    background-color: #27ae60;
+}
+
+.success-btn:hover {
+    background-color: #1e8449;
+}
+
+.ai-btn {
+    background-color: #8e44ad;
+}
+
+.ai-btn:hover {
+    background-color: #71368a;
+}
+
+.ai-btn:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.ai-result {
+    background: #fbf7ff;
+    border-color: #eadcf8;
+    white-space: normal;
+}
+
+.ai-error {
+    color: #c0392b;
+    font-weight: bold;
+    line-height: 1.8;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.three-columns {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.card {
+    background-color: #f8f9fa;
+    padding: 18px;
+    border-radius: 10px;
+    margin-top: 15px;
+    border: 1px solid #ddd;
+}
+
+.result-box {
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.safe {
+    background-color: #d5f5e3;
+    color: #1e8449;
+}
+
+.notice {
+    background-color: #fcf3cf;
+    color: #b7950b;
+}
+
+.warning {
+    background-color: #fdebd0;
+    color: #ca6f1e;
+}
+
+.over {
+    background-color: #fadbd8;
+    color: #c0392b;
+}
+
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+    margin-top: 18px;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+th {
+    background-color: #3498db;
+    color: white;
+}
+
+.summary {
+    line-height: 1.8;
+}
+
+.bar-container {
+    background-color: #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 24px;
+    margin-top: 10px;
+}
+
+.bar {
+    height: 24px;
+    width: 0%;
+    background-color: #3498db;
+    text-align: center;
+    color: white;
+    line-height: 24px;
+    font-size: 13px;
+    transition: width 0.3s ease;
+}
+
+.chart-card {
+    margin-top: 18px;
+}
+
+.chart-title-row p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+.chart-layout {
+    display: grid;
+    grid-template-columns: minmax(240px, 330px) 1fr;
+    gap: 24px;
+    align-items: center;
+    margin-top: 18px;
+}
+
+.chart-canvas-wrap {
+    width: 100%;
+    max-width: 330px;
+    margin: 0 auto;
+}
+
+#categoryPieChart {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+}
+
+.chart-legend {
+    display: grid;
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.legend-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-name {
+    font-weight: bold;
+    word-break: keep-all;
+}
+
+.legend-value {
+    color: #6b7280;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.chart-hint {
+    margin: 14px 0 0;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+textarea {
+    height: 180px;
+    resize: vertical;
+}
+
+@media (max-width: 768px) {
+    body {
+        background: #ffffff;
+    }
+
+    .container {
+        width: 100%;
+        margin: 0;
+        padding: 18px;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    h1 {
+        font-size: 24px;
+        line-height: 1.35;
+    }
+
+    h2 {
+        font-size: 19px;
+        margin-top: 26px;
+    }
+
+    .grid,
+    .three-columns {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+        font-size: 16px;
+    }
+
+    .button-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px 16px;
+    }
+
+    table {
+        font-size: 13px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .chart-layout {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .chart-canvas-wrap {
+        max-width: 280px;
+    }
+
+    .legend-item {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .legend-value {
+        white-space: normal;
+    }
+}
+
+@media (max-width: 420px) {
+    .container {
+        padding: 14px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+
+    .subtitle {
+        font-size: 14px;
+    }
+}
