@@ -864,16 +864,12 @@ td button {
     }
 }
 
-/* 左側選單版面 */
+/* 下拉式選單版面 */
 .app-shell {
     position: relative;
     z-index: 1;
-    width: min(96%, 1440px);
+    width: min(94%, 1180px);
     margin: 34px auto;
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    gap: 24px;
-    align-items: start;
 }
 
 .app-shell .container {
@@ -881,24 +877,27 @@ td button {
     margin: 0;
 }
 
-.sidebar {
-    position: sticky;
-    top: 24px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.68);
-    border-radius: var(--radius-lg);
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: var(--shadow-md);
-    backdrop-filter: blur(18px);
+.dropdown-layout {
+    display: block;
 }
 
-.sidebar-brand {
+.menu-select-card {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(220px, 320px);
+    gap: 16px 20px;
+    align-items: end;
+    margin: 0 0 28px;
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.94));
+    box-shadow: var(--shadow-sm);
+}
+
+.menu-select-title {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 18px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--line);
 }
 
 .brand-icon {
@@ -906,55 +905,40 @@ td button {
     width: 44px;
     height: 44px;
     place-items: center;
+    flex: 0 0 auto;
     border-radius: 16px;
     background: linear-gradient(135deg, var(--primary-soft), var(--purple-soft));
     font-size: 22px;
 }
 
-.sidebar-brand strong,
-.sidebar-brand small {
+.menu-select-title strong,
+.menu-select-title small {
     display: block;
 }
 
-.sidebar-brand strong {
+.menu-select-title strong {
     font-size: 18px;
     color: var(--text-main);
 }
 
-.sidebar-brand small {
-    margin-top: 3px;
+.menu-select-title small {
+    margin-top: 4px;
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 13px;
+    line-height: 1.5;
 }
 
-.sidebar-menu {
-    display: grid;
-    gap: 10px;
+.menu-select-card label {
+    margin-top: 0;
 }
 
-.sidebar-menu .menu-btn {
-    width: 100%;
-    margin: 0;
-    padding: 13px 15px;
-    color: var(--slate);
-    text-align: left;
-    border: 1px solid transparent;
-    border-radius: 16px;
-    background: transparent;
-    box-shadow: none;
-}
-
-.sidebar-menu .menu-btn:hover {
-    transform: translateX(3px);
-    color: var(--primary-dark);
-    background: #eff6ff;
-    box-shadow: none;
-}
-
-.sidebar-menu .menu-btn.active {
-    color: #ffffff;
-    background: linear-gradient(135deg, var(--primary), var(--purple));
-    box-shadow: 0 12px 22px rgba(37, 99, 235, 0.22);
+.menu-select {
+    height: 48px;
+    margin-top: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    background:
+        linear-gradient(135deg, #fbfdff, #eff6ff);
 }
 
 .menu-section {
@@ -965,70 +949,33 @@ td button {
     display: block;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 768px) {
     .app-shell {
         width: 100%;
         margin: 0;
-        grid-template-columns: 1fr;
-        gap: 0;
     }
 
-    .sidebar {
-        position: sticky;
-        top: 0;
-        z-index: 50;
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-        padding: 14px 16px;
-    }
-
-    .sidebar-brand {
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-    }
-
-    .sidebar-menu {
-        display: flex;
-        gap: 9px;
-        overflow-x: auto;
-        padding-bottom: 4px;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .sidebar-menu .menu-btn {
-        width: auto;
-        flex: 0 0 auto;
-        padding: 11px 14px;
-        white-space: nowrap;
-        text-align: center;
-    }
-
-    .sidebar-menu .menu-btn:hover {
-        transform: none;
-    }
-
-    .app-shell .container {
-        border-radius: 0;
-    }
-}
-
-@media (max-width: 768px) {
     .app-shell .container {
         width: 100%;
         margin: 0;
         padding: 20px 16px 28px;
         border: none;
+        border-radius: 0;
         box-shadow: none;
         backdrop-filter: none;
     }
 
-    .sidebar {
-        box-shadow: var(--shadow-sm);
+    .menu-select-card {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-bottom: 24px;
+        padding: 16px;
+        border-radius: 18px;
     }
 
-    .sidebar-brand {
-        align-items: flex-start;
+    .brand-icon {
+        width: 40px;
+        height: 40px;
     }
 
     h1 {
@@ -1083,17 +1030,22 @@ td button {
 }
 
 @media (max-width: 420px) {
-    .sidebar {
-        padding: 12px 14px;
+    .container {
+        padding: 18px 14px 26px;
     }
 
-    .brand-icon {
-        width: 40px;
-        height: 40px;
+    h1 {
+        font-size: 23px;
     }
 
-    .sidebar-menu .menu-btn {
-        padding: 10px 12px;
+    h2 {
+        font-size: 19px;
+    }
+
+    .subtitle,
+    .section-desc,
+    .chart-title-row p,
+    .chart-hint {
         font-size: 14px;
     }
 }

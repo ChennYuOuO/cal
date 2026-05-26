@@ -65,6 +65,7 @@ window.onload = function () {
 function showMenu(menuId) {
     const sections = document.querySelectorAll(".menu-section");
     const buttons = document.querySelectorAll(".menu-btn");
+    const menuSelect = document.getElementById("menuSelect");
 
     sections.forEach(function (section) {
         section.classList.remove("active");
@@ -73,6 +74,10 @@ function showMenu(menuId) {
     buttons.forEach(function (button) {
         button.classList.toggle("active", button.dataset.target === menuId);
     });
+
+    if (menuSelect && menuSelect.value !== menuId) {
+        menuSelect.value = menuId;
+    }
 
     const targetSection = document.getElementById(menuId);
 

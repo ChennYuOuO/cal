@@ -9,28 +9,29 @@
 
 <body>
 
-<div class="app-shell">
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <span class="brand-icon">💰</span>
-            <div>
-                <strong>記帳系統</strong>
-                <small>Budget Panel</small>
-            </div>
-        </div>
-
-        <nav class="sidebar-menu" aria-label="左側功能選單">
-            <button type="button" class="menu-btn active" data-target="basicMenu" onclick="showMenu('basicMenu')">基本設定</button>
-            <button type="button" class="menu-btn" data-target="budgetMenu" onclick="showMenu('budgetMenu')">預算分配</button>
-            <button type="button" class="menu-btn" data-target="expenseMenu" onclick="showMenu('expenseMenu')">新增紀錄</button>
-            <button type="button" class="menu-btn" data-target="analysisMenu" onclick="showMenu('analysisMenu')">消費分析</button>
-            <button type="button" class="menu-btn" data-target="aiMenu" onclick="showMenu('aiMenu')">AI 分析</button>
-        </nav>
-    </aside>
-
+<div class="app-shell dropdown-layout">
     <main class="container">
         <h1>個人記帳與消費分析系統</h1>
         <p class="subtitle">支出紀錄、預算預警、分類圓餅圖與 AI 智慧消費分析</p>
+
+        <div class="menu-select-card">
+            <div class="menu-select-title">
+                <span class="brand-icon">💰</span>
+                <div>
+                    <strong>功能選單</strong>
+                    <small>請使用下拉式選單切換功能</small>
+                </div>
+            </div>
+
+            <label for="menuSelect">選擇功能</label>
+            <select id="menuSelect" class="menu-select" onchange="showMenu(this.value)">
+                <option value="basicMenu">基本設定</option>
+                <option value="budgetMenu">預算分配</option>
+                <option value="expenseMenu">新增紀錄</option>
+                <option value="analysisMenu">消費分析</option>
+                <option value="aiMenu">AI 分析</option>
+            </select>
+        </div>
 
         <section id="basicMenu" class="menu-section active">
             <h2>一、基本預算設定</h2>
