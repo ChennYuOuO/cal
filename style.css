@@ -843,3 +843,27 @@ td button {
         font-size: 14px;
     }
 }
+@media (max-width: 768px) {
+    input[type="date"],
+    input[type="month"] {
+        -webkit-appearance: none;
+        appearance: none;
+
+        height: 42px;
+        min-height: 42px;
+        line-height: 42px;
+
+        padding: 0 12px;
+        font-size: 16px;
+        text-align: left;
+
+        border-radius: 10px;
+    }
+
+    input[type="date"]::-webkit-date-and-time-value,
+    input[type="month"]::-webkit-date-and-time-value {
+        text-align: left;
+        line-height: 42px;
+        min-height: 42px;
+    }
+}
