@@ -716,6 +716,13 @@ td button {
         border-radius: 0;
         box-shadow: none;
         backdrop-filter: none;
+        #month,
+        #expenseDate {
+        height: 38px;
+        padding: 6px 10px;
+        font-size: 14px;
+        border-radius: 8px;
+}
     }
 
     h1 {
