@@ -93,7 +93,7 @@ async function handleGeminiAnalyze(req, res) {
                 systemInstruction: {
                     parts: [
                         {
-                            text: "你是一位個人記帳與消費分析助理。請使用繁體中文，回答要簡短、直接、重點式，不要寒暄，不要超過 150 字。"
+                            text: "你是個人記帳與消費分析助理。請使用繁體中文回答。請控制在 150 字以內。不要開頭寒暄。不要解釋太多。請只分成三點回答：1. 消費狀況2. 主要問題3. 改善建議"
                         }
                     ]
                 },
@@ -104,8 +104,8 @@ async function handleGeminiAnalyze(req, res) {
                     }
                 ],
                 generationConfig: {
-                    temperature: 0.4,
-                    maxOutputTokens: 400
+                    temperature: 0.5,
+                    maxOutputTokens: 2048
                 }
             })
         });
