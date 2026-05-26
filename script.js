@@ -59,7 +59,36 @@ window.onload = function () {
     renderTable();
     calculateBudget();
     renderPieChart({}, 0);
+    showMenu("basicMenu");
 };
+
+function showMenu(menuId) {
+    const sections = document.querySelectorAll(".menu-section");
+    const buttons = document.querySelectorAll(".menu-btn");
+
+    sections.forEach(function (section) {
+        section.classList.remove("active");
+    });
+
+    buttons.forEach(function (button) {
+        button.classList.toggle("active", button.dataset.target === menuId);
+    });
+
+    const targetSection = document.getElementById(menuId);
+
+    if (targetSection) {
+        targetSection.classList.add("active");
+    }
+
+    if (menuId === "analysisMenu") {
+        const categoryTotal = getCategoryTotal();
+        const totalExpense = expenses.reduce(function (sum, expense) {
+            return sum + expense.amount;
+        }, 0);
+
+        renderPieChart(categoryTotal, totalExpense);
+    }
+}
 
 function setToday() {
     const today = new Date().toISOString().split("T")[0];

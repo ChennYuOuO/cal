@@ -9,189 +9,219 @@
 
 <body>
 
-<div class="container">
-    <h1>個人記帳與消費分析系統</h1>
-    <p class="subtitle">支出紀錄、預算預警、分類圓餅圖與 AI 智慧消費分析</p>
-
-    <h2>一、基本預算設定</h2>
-
-    <div class="grid">
-        <div>
-            <label>月份</label>
-            <input type="month" id="month">
-        </div>
-
-        <div>
-            <label>本月收入</label>
-            <input type="number" id="income" placeholder="例如：30000">
-        </div>
-
-        <div>
-            <label>固定支出</label>
-            <input type="number" id="fixedExpense" placeholder="例如：10000">
-        </div>
-
-        <div>
-            <label>可用消費預算</label>
-            <input type="number" id="availableBudget" readonly>
-        </div>
-    </div>
-
-    <h2>二、預警門檻設定</h2>
-
-    <div class="grid three-columns">
-        <div>
-            <label>安全上限 (%)</label>
-            <input type="number" id="safeLimit" value="70">
-        </div>
-
-        <div>
-            <label>注意上限 (%)</label>
-            <input type="number" id="noticeLimit" value="90">
-        </div>
-
-        <div>
-            <label>警告上限 (%)</label>
-            <input type="number" id="warningLimit" value="100">
-        </div>
-    </div>
-
-    <div class="button-group">
-        <button onclick="calculateBudget()">計算可用預算</button>
-    </div>
-
-    <h2>三、分類預算百分比設定</h2>
-
-    <p class="section-desc">可依照「可用消費預算」自行設定各分類的預算比例與警示門檻，系統會自動換算成金額，新增支出後若達到門檻會主動跳出提醒。</p>
-
-    <div id="categoryBudgetGrid" class="category-budget-grid"></div>
-
-    <div id="budgetPercentSummary" class="budget-percent-summary"></div>
-
-    <div class="button-group">
-        <button onclick="resetCategoryBudgetPercents()" class="secondary-btn">重設為預設比例</button>
-    </div>
-
-    <h2>四、新增消費紀錄</h2>
-
-    <div class="grid">
-        <div>
-            <label>日期</label>
-            <input type="date" id="expenseDate">
-        </div>
-
-        <div>
-            <label>消費項目</label>
-            <input type="text" id="itemName" placeholder="例如：午餐、飲料、電影票">
-        </div>
-
-        <div>
-            <label>金額</label>
-            <input type="number" id="amount" placeholder="例如：120">
-        </div>
-
-        <div>
-            <label>分類</label>
-            <select id="category">
-                <option value="餐飲">餐飲</option>
-                <option value="交通">交通</option>
-                <option value="娛樂">娛樂</option>
-                <option value="購物">購物</option>
-                <option value="學習">學習</option>
-                <option value="生活用品">生活用品</option>
-                <option value="醫療">醫療</option>
-                <option value="其他">其他</option>
-            </select>
-        </div>
-
-        <div>
-            <label>支出類型</label>
-            <select id="necessary">
-                <option value="必要">必要支出</option>
-                <option value="非必要">非必要支出</option>
-            </select>
-        </div>
-
-        <div>
-            <label>備註</label>
-            <input type="text" id="note" placeholder="可空白">
-        </div>
-    </div>
-
-    <div class="button-group">
-        <button onclick="addExpense()" class="success-btn">新增消費</button>
-        <button onclick="clearAll()" class="danger-btn">清空所有資料</button>
-    </div>
-
-    <h2>五、消費紀錄表</h2>
-
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>日期</th>
-                    <th>項目</th>
-                    <th>金額</th>
-                    <th>分類</th>
-                    <th>類型</th>
-                    <th>備註</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-
-            <tbody id="expenseTable"></tbody>
-        </table>
-    </div>
-
-    <h2>六、消費分析結果</h2>
-
-    <div class="button-group">
-        <button onclick="analyzeExpense()">開始分析</button>
-    </div>
-
-    <div id="analysisResult" class="card summary"></div>
-
-    <div class="bar-container">
-        <div id="budgetBar" class="bar">0%</div>
-    </div>
-
-    <div id="warningBox"></div>
-
-    <div class="card chart-card">
-        <div class="chart-title-row">
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <span class="brand-icon">💰</span>
             <div>
-                <h3>分類支出圓餅圖</h3>
-                <p>依照各分類的支出金額，顯示本月消費比例。</p>
+                <strong>記帳系統</strong>
+                <small>Budget Panel</small>
             </div>
         </div>
 
-        <div class="chart-layout">
-            <div class="chart-canvas-wrap">
-                <canvas id="categoryPieChart" aria-label="分類支出圓餅圖" role="img"></canvas>
+        <nav class="sidebar-menu" aria-label="左側功能選單">
+            <button type="button" class="menu-btn active" data-target="basicMenu" onclick="showMenu('basicMenu')">基本設定</button>
+            <button type="button" class="menu-btn" data-target="budgetMenu" onclick="showMenu('budgetMenu')">預算分配</button>
+            <button type="button" class="menu-btn" data-target="expenseMenu" onclick="showMenu('expenseMenu')">新增紀錄</button>
+            <button type="button" class="menu-btn" data-target="analysisMenu" onclick="showMenu('analysisMenu')">消費分析</button>
+            <button type="button" class="menu-btn" data-target="aiMenu" onclick="showMenu('aiMenu')">AI 分析</button>
+        </nav>
+    </aside>
+
+    <main class="container">
+        <h1>個人記帳與消費分析系統</h1>
+        <p class="subtitle">支出紀錄、預算預警、分類圓餅圖與 AI 智慧消費分析</p>
+
+        <section id="basicMenu" class="menu-section active">
+            <h2>一、基本預算設定</h2>
+
+            <div class="grid">
+                <div>
+                    <label>月份</label>
+                    <input type="month" id="month">
+                </div>
+
+                <div>
+                    <label>本月收入</label>
+                    <input type="number" id="income" placeholder="例如：30000">
+                </div>
+
+                <div>
+                    <label>固定支出</label>
+                    <input type="number" id="fixedExpense" placeholder="例如：10000">
+                </div>
+
+                <div>
+                    <label>可用消費預算</label>
+                    <input type="number" id="availableBudget" readonly>
+                </div>
             </div>
-            <div id="chartLegend" class="chart-legend"></div>
-        </div>
 
-        <p id="chartHint" class="chart-hint">目前沒有消費資料，新增資料後按「開始分析」即可產生圓餅圖。</p>
-    </div>
+            <h2>二、預警門檻設定</h2>
 
-    <h2>七、AI 智慧消費分析</h2>
+            <div class="grid three-columns">
+                <div>
+                    <label>安全上限 (%)</label>
+                    <input type="number" id="safeLimit" value="70">
+                </div>
 
-    <p>按下按鈕後，系統會將目前的收入、預算、分類支出與消費明細送到 Node.js 後端，再由 AI 產生個人化消費建議。</p>
+                <div>
+                    <label>注意上限 (%)</label>
+                    <input type="number" id="noticeLimit" value="90">
+                </div>
 
-    <div class="button-group">
-        <button onclick="askGeminiAnalysis()" class="ai-btn" id="geminiButton">產生 AI 消費分析</button>
-    </div>
+                <div>
+                    <label>警告上限 (%)</label>
+                    <input type="number" id="warningLimit" value="100">
+                </div>
+            </div>
 
-    <div id="geminiResult" class="card summary ai-result">
-        尚未產生 AI 分析結果。
-    </div>
+            <div class="button-group">
+                <button onclick="calculateBudget()">計算可用預算</button>
+            </div>
+        </section>
 
-    <h2>八、AI 分析 Prompt 備用</h2>
+        <section id="budgetMenu" class="menu-section">
+            <h2>預算分配</h2>
 
-    <p>如果沒有設定 AI API，也可以把下面內容複製到 ChatGPT 或其他 AI 工具進行分析。</p>
+            <p class="section-desc">可依照「可用消費預算」自行設定各分類的預算比例與警示門檻，系統會自動換算成金額，新增支出後若達到門檻會主動跳出提醒。</p>
 
-    <textarea id="aiPrompt" readonly></textarea>
+            <div id="categoryBudgetGrid" class="category-budget-grid"></div>
+
+            <div id="budgetPercentSummary" class="budget-percent-summary"></div>
+
+            <div class="button-group">
+                <button onclick="resetCategoryBudgetPercents()" class="secondary-btn">重設為預設比例</button>
+            </div>
+        </section>
+
+        <section id="expenseMenu" class="menu-section">
+            <h2>新增消費紀錄</h2>
+
+            <div class="grid">
+                <div>
+                    <label>日期</label>
+                    <input type="date" id="expenseDate">
+                </div>
+
+                <div>
+                    <label>消費項目</label>
+                    <input type="text" id="itemName" placeholder="例如：午餐、飲料、電影票">
+                </div>
+
+                <div>
+                    <label>金額</label>
+                    <input type="number" id="amount" placeholder="例如：120">
+                </div>
+
+                <div>
+                    <label>分類</label>
+                    <select id="category">
+                        <option value="餐飲">餐飲</option>
+                        <option value="交通">交通</option>
+                        <option value="娛樂">娛樂</option>
+                        <option value="購物">購物</option>
+                        <option value="學習">學習</option>
+                        <option value="生活用品">生活用品</option>
+                        <option value="醫療">醫療</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>支出類型</label>
+                    <select id="necessary">
+                        <option value="必要">必要支出</option>
+                        <option value="非必要">非必要支出</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>備註</label>
+                    <input type="text" id="note" placeholder="可空白">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button onclick="addExpense()" class="success-btn">新增消費</button>
+                <button onclick="clearAll()" class="danger-btn">清空所有資料</button>
+            </div>
+
+            <h2>消費紀錄表</h2>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>項目</th>
+                            <th>金額</th>
+                            <th>分類</th>
+                            <th>類型</th>
+                            <th>備註</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="expenseTable"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="analysisMenu" class="menu-section">
+            <h2>消費分析結果</h2>
+
+            <div class="button-group">
+                <button onclick="analyzeExpense()">開始分析</button>
+            </div>
+
+            <div id="analysisResult" class="card summary"></div>
+
+            <div class="bar-container">
+                <div id="budgetBar" class="bar">0%</div>
+            </div>
+
+            <div id="warningBox"></div>
+
+            <div class="card chart-card">
+                <div class="chart-title-row">
+                    <div>
+                        <h3>分類支出圓餅圖</h3>
+                        <p>依照各分類的支出金額，顯示本月消費比例。</p>
+                    </div>
+                </div>
+
+                <div class="chart-layout">
+                    <div class="chart-canvas-wrap">
+                        <canvas id="categoryPieChart" aria-label="分類支出圓餅圖" role="img"></canvas>
+                    </div>
+                    <div id="chartLegend" class="chart-legend"></div>
+                </div>
+
+                <p id="chartHint" class="chart-hint">目前沒有消費資料，新增資料後按「開始分析」即可產生圓餅圖。</p>
+            </div>
+        </section>
+
+        <section id="aiMenu" class="menu-section">
+            <h2>AI 智慧消費分析</h2>
+
+            <p>按下按鈕後，系統會將目前的收入、預算、分類支出與消費明細送到 Node.js 後端，再由 AI 產生個人化消費建議。</p>
+
+            <div class="button-group">
+                <button onclick="askGeminiAnalysis()" class="ai-btn" id="geminiButton">產生 AI 消費分析</button>
+            </div>
+
+            <div id="geminiResult" class="card summary ai-result">
+                尚未產生 AI 分析結果。
+            </div>
+
+            <h2>AI 分析 Prompt 備用</h2>
+
+            <p>如果沒有設定 AI API，也可以把下面內容複製到 ChatGPT 或其他 AI 工具進行分析。</p>
+
+            <textarea id="aiPrompt" readonly></textarea>
+        </section>
+    </main>
 </div>
 
 <div id="categoryAlertModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="categoryAlertTitle">
