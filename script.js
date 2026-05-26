@@ -648,35 +648,49 @@ function renderPieChart(categoryTotal, totalExpense) {
     let startAngle = -Math.PI / 2;
 
     categories.forEach(function (category, index) {
-        const value = categoryTotal[category];
-        const percent = value / totalExpense;
-        const endAngle = startAngle + percent * Math.PI * 2;
-        const color = pieColors[index % pieColors.length];
+    const value = categoryTotal[category];
+    const percent = value / totalExpense;
+    const endAngle = startAngle + percent * Math.PI * 2;
+    const color = pieColors[index % pieColors.length];
 
-        ctx.beginPath();
-        ctx.moveTo(center, center);
-        ctx.arc(center, center, radius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle = color;
-        ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, radius, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
 
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 3;
-        ctx.stroke();
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
-        startAngle = endAngle;
+    const percentText = (percent * 100).toFixed(1);
 
-        const percentText = (percent * 100).toFixed(2);
-        legend.innerHTML += `
-            <div class="legend-item">
-                <div class="legend-left">
-                    <span class="legend-color" style="background-color: ${color};"></span>
-                    <span class="legend-name">${escapeHTML(category)}</span>
-                </div>
-                <span class="legend-value">${value} 元｜${percentText}%</span>
+    // 在圓餅圖區塊中顯示占比
+    if (percent >= 0.06) {
+        const midAngle = (startAngle + endAngle) / 2;
+        const textX = center + Math.cos(midAngle) * radius * 0.75;
+        const textY = center + Math.sin(midAngle) * radius * 0.75;
+
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 10px Microsoft JhengHei, Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(percentText + "%", textX, textY);
+    }
+
+    startAngle = endAngle;
+
+    legend.innerHTML += `
+        <div class="legend-item">
+            <div class="legend-left">
+                <span class="legend-color" style="background-color: ${color};"></span>
+                <span class="legend-name">${escapeHTML(category)}</span>
             </div>
-        `;
-    });
+            <span class="legend-value">${value} 元｜${percentText}%</span>
+        </div>
+    `;
+});
 
     ctx.beginPath();
     ctx.arc(center, center, radius * 0.55, 0, Math.PI * 2);

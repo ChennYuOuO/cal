@@ -534,10 +534,10 @@ td button {
     width: 100%;
     max-width: 340px;
     margin: 0 auto;
-    padding: 16px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #eff6ff, #faf5ff);
-    box-shadow: inset 0 0 0 1px rgba(147, 197, 253, 0.4);
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 #categoryPieChart {
@@ -718,7 +718,6 @@ td button {
         backdrop-filter: none;
     }
 
-    /* 修正 iOS Safari 日期與月份輸入框過高問題 */
     input[type="date"],
     input[type="month"] {
         -webkit-appearance: none;
@@ -820,7 +819,7 @@ td button {
 
     .chart-canvas-wrap {
         max-width: 290px;
-        padding: 12px;
+        padding: 0;
     }
 
     .legend-item {
