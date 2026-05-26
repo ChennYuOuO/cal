@@ -716,14 +716,35 @@ td button {
         border-radius: 0;
         box-shadow: none;
         backdrop-filter: none;
-        #month,
-        #expenseDate {
-        height: 38px;
-        padding: 6px 10px;
-        font-size: 14px;
-        border-radius: 8px;
-}
     }
+
+    /* 修正 iOS Safari 日期與月份輸入框過高問題 */
+    input[type="date"],
+    input[type="month"] {
+        -webkit-appearance: none;
+        appearance: none;
+
+        width: 100%;
+        height: 42px;
+        min-height: 42px;
+        line-height: 42px;
+
+        padding: 0 12px;
+        font-size: 16px;
+        text-align: left;
+
+        border-radius: 10px;
+        background-color: #ffffff;
+    }
+
+    input[type="date"]::-webkit-date-and-time-value,
+    input[type="month"]::-webkit-date-and-time-value {
+        text-align: left;
+        line-height: 42px;
+        min-height: 42px;
+    }
+}
+    
 
     h1 {
         font-size: 25px;
@@ -821,7 +842,7 @@ td button {
         align-items: stretch;
         flex-direction: column;
     }
-}
+
 
 @media (max-width: 420px) {
     .container {
@@ -841,29 +862,5 @@ td button {
     .chart-title-row p,
     .chart-hint {
         font-size: 14px;
-    }
-}
-@media (max-width: 768px) {
-    input[type="date"],
-    input[type="month"] {
-        -webkit-appearance: none;
-        appearance: none;
-
-        height: 42px;
-        min-height: 42px;
-        line-height: 42px;
-
-        padding: 0 12px;
-        font-size: 16px;
-        text-align: left;
-
-        border-radius: 10px;
-    }
-
-    input[type="date"]::-webkit-date-and-time-value,
-    input[type="month"]::-webkit-date-and-time-value {
-        text-align: left;
-        line-height: 42px;
-        min-height: 42px;
     }
 }
