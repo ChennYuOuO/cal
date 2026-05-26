@@ -11,7 +11,7 @@
 
 <div class="container">
     <h1>個人記帳與消費分析系統</h1>
-    <p class="subtitle">支出紀錄、預算預警、分類圓餅圖與 Gemini AI 智慧分析</p>
+    <p class="subtitle">支出紀錄、預算預警、分類圓餅圖與 AI 智慧消費分析</p>
 
     <h2>一、基本預算設定</h2>
 
@@ -60,7 +60,19 @@
         <button onclick="calculateBudget()">計算可用預算</button>
     </div>
 
-    <h2>三、新增消費紀錄</h2>
+    <h2>三、分類預算百分比設定</h2>
+
+    <p class="section-desc">可依照「可用消費預算」自行設定各分類的預算比例與警示門檻，系統會自動換算成金額，新增支出後若達到門檻會主動跳出提醒。</p>
+
+    <div id="categoryBudgetGrid" class="category-budget-grid"></div>
+
+    <div id="budgetPercentSummary" class="budget-percent-summary"></div>
+
+    <div class="button-group">
+        <button onclick="resetCategoryBudgetPercents()" class="secondary-btn">重設為預設比例</button>
+    </div>
+
+    <h2>四、新增消費紀錄</h2>
 
     <div class="grid">
         <div>
@@ -111,7 +123,7 @@
         <button onclick="clearAll()" class="danger-btn">清空所有資料</button>
     </div>
 
-    <h2>四、消費紀錄表</h2>
+    <h2>五、消費紀錄表</h2>
 
     <div class="table-wrap">
         <table>
@@ -131,7 +143,7 @@
         </table>
     </div>
 
-    <h2>五、消費分析結果</h2>
+    <h2>六、消費分析結果</h2>
 
     <div class="button-group">
         <button onclick="analyzeExpense()">開始分析</button>
@@ -163,23 +175,36 @@
         <p id="chartHint" class="chart-hint">目前沒有消費資料，新增資料後按「開始分析」即可產生圓餅圖。</p>
     </div>
 
-    <h2>六、Gemini AI 智慧分析</h2>
+    <h2>七、AI 智慧消費分析</h2>
 
-    <p>按下按鈕後，系統會將目前的收入、預算、分類支出與消費明細送到 Node.js 後端，再由 Gemini API 產生個人化消費建議。</p>
+    <p>按下按鈕後，系統會將目前的收入、預算、分類支出與消費明細送到 Node.js 後端，再由 AI 產生個人化消費建議。</p>
 
     <div class="button-group">
-        <button onclick="askGeminiAnalysis()" class="ai-btn" id="geminiButton">使用 Gemini API 產生 AI 分析</button>
+        <button onclick="askGeminiAnalysis()" class="ai-btn" id="geminiButton">產生 AI 消費分析</button>
     </div>
 
     <div id="geminiResult" class="card summary ai-result">
-        尚未產生 Gemini AI 分析結果。
+        尚未產生 AI 分析結果。
     </div>
 
-    <h2>七、AI 分析 Prompt 備用</h2>
+    <h2>八、AI 分析 Prompt 備用</h2>
 
-    <p>如果沒有設定 Gemini API，也可以把下面內容複製到 ChatGPT 或其他 AI 工具進行分析。</p>
+    <p>如果沒有設定 AI API，也可以把下面內容複製到 ChatGPT 或其他 AI 工具進行分析。</p>
 
     <textarea id="aiPrompt" readonly></textarea>
+</div>
+
+<div id="categoryAlertModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="categoryAlertTitle">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3 id="categoryAlertTitle">分類預算提醒</h3>
+            <button type="button" class="modal-close" onclick="closeCategoryAlertModal()" aria-label="關閉提醒">×</button>
+        </div>
+        <div id="categoryAlertContent" class="modal-content"></div>
+        <div class="modal-actions">
+            <button type="button" onclick="closeCategoryAlertModal()">我知道了</button>
+        </div>
+    </div>
 </div>
 
 <script src="script.js"></script>

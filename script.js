@@ -11,9 +11,51 @@ const pieColors = [
     "#e67e22"
 ];
 
+const budgetCategories = [
+    "餐飲",
+    "交通",
+    "娛樂",
+    "購物",
+    "學習",
+    "生活用品",
+    "醫療",
+    "其他"
+];
+
+let categoryBudgetPercents = getDefaultCategoryBudgetPercents();
+let categoryWarningPercents = getDefaultCategoryWarningPercents();
+
+function getDefaultCategoryBudgetPercents() {
+    return {
+        "餐飲": 30,
+        "交通": 15,
+        "娛樂": 10,
+        "購物": 15,
+        "學習": 10,
+        "生活用品": 10,
+        "醫療": 5,
+        "其他": 5
+    };
+}
+
+function getDefaultCategoryWarningPercents() {
+    return {
+        "餐飲": 80,
+        "交通": 80,
+        "娛樂": 80,
+        "購物": 80,
+        "學習": 80,
+        "生活用品": 80,
+        "醫療": 80,
+        "其他": 80
+    };
+}
+
 window.onload = function () {
     setToday();
     loadFromLocalStorage();
+    closeCategoryAlertModal();
+    renderCategoryBudgetInputs();
     renderTable();
     calculateBudget();
     renderPieChart({}, 0);
@@ -36,7 +78,167 @@ function calculateBudget() {
 
     document.getElementById("availableBudget").value = availableBudget;
 
+    updateCategoryBudgetPreview();
     saveToLocalStorage();
+}
+
+function renderCategoryBudgetInputs() {
+    const grid = document.getElementById("categoryBudgetGrid");
+
+    if (!grid) {
+        return;
+    }
+
+    grid.innerHTML = "";
+
+    budgetCategories.forEach(function (category, index) {
+        const budgetValue = Number(categoryBudgetPercents[category]) || 0;
+        const warningValue = Number(categoryWarningPercents[category]) || 80;
+
+        grid.innerHTML += `
+            <div class="budget-input-card">
+                <h4>${escapeHTML(category)}</h4>
+
+                <label>預算比例 (%)</label>
+                <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    id="categoryBudgetPercent${index}"
+                    value="${budgetValue}"
+                    oninput="onCategoryBudgetInput()"
+                >
+                <div class="budget-amount-text" id="categoryBudgetAmount${index}">預算金額：0 元</div>
+
+                <label>警示門檻 (%)</label>
+                <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    step="1"
+                    id="categoryWarningPercent${index}"
+                    value="${warningValue}"
+                    oninput="onCategoryBudgetInput()"
+                >
+                <div class="budget-warning-text" id="categoryWarningAmount${index}">提醒金額：0 元</div>
+            </div>
+        `;
+    });
+
+    updateCategoryBudgetPreview();
+}
+
+function readCategoryBudgetInputs() {
+    const nextPercents = {};
+
+    budgetCategories.forEach(function (category, index) {
+        const input = document.getElementById(`categoryBudgetPercent${index}`);
+        let value = input ? Number(input.value) : Number(categoryBudgetPercents[category]) || 0;
+
+        if (!Number.isFinite(value) || value < 0) {
+            value = 0;
+        }
+
+        nextPercents[category] = value;
+    });
+
+    categoryBudgetPercents = nextPercents;
+    return nextPercents;
+}
+
+function readCategoryWarningInputs() {
+    const nextWarnings = {};
+
+    budgetCategories.forEach(function (category, index) {
+        const input = document.getElementById(`categoryWarningPercent${index}`);
+        let value = input ? Number(input.value) : Number(categoryWarningPercents[category]) || 80;
+
+        if (!Number.isFinite(value)) {
+            value = 80;
+        }
+
+        if (value < 1) {
+            value = 1;
+        }
+
+        if (value > 100) {
+            value = 100;
+        }
+
+        nextWarnings[category] = value;
+    });
+
+    categoryWarningPercents = nextWarnings;
+    return nextWarnings;
+}
+
+function onCategoryBudgetInput() {
+    updateCategoryBudgetPreview();
+    saveToLocalStorage();
+
+    if (hasAnalysisResult()) {
+        analyzeExpense();
+    }
+}
+
+function updateCategoryBudgetPreview() {
+    const summary = document.getElementById("budgetPercentSummary");
+
+    if (!summary) {
+        return;
+    }
+
+    const percents = readCategoryBudgetInputs();
+    const warnings = readCategoryWarningInputs();
+    const availableBudget = Number(document.getElementById("availableBudget").value) || 0;
+
+    let totalPercent = 0;
+
+    budgetCategories.forEach(function (category, index) {
+        const percent = Number(percents[category]) || 0;
+        const amount = availableBudget > 0 ? availableBudget * percent / 100 : 0;
+        const warningPercent = Number(warnings[category]) || 80;
+        const warningAmount = amount * warningPercent / 100;
+        const amountText = document.getElementById(`categoryBudgetAmount${index}`);
+        const warningText = document.getElementById(`categoryWarningAmount${index}`);
+
+        totalPercent += percent;
+
+        if (amountText) {
+            amountText.textContent = `預算金額：約 ${Math.round(amount)} 元`;
+        }
+
+        if (warningText) {
+            warningText.textContent = `提醒金額：約 ${Math.round(warningAmount)} 元（達 ${warningPercent}% 跳出）`;
+        }
+    });
+
+    const remainingPercent = 100 - totalPercent;
+    let summaryClass = "budget-ok";
+    let message = `目前已分配 ${totalPercent.toFixed(1)}%，剩餘 ${remainingPercent.toFixed(1)}%。`;
+
+    if (totalPercent > 100) {
+        summaryClass = "budget-over-percent";
+        message = `目前已分配 ${totalPercent.toFixed(1)}%，已超過 100%，請調低部分分類比例。`;
+    } else if (totalPercent < 100) {
+        summaryClass = "budget-under-percent";
+        message = `目前已分配 ${totalPercent.toFixed(1)}%，尚有 ${remainingPercent.toFixed(1)}% 未分配。`;
+    }
+
+    summary.className = `budget-percent-summary ${summaryClass}`;
+    summary.innerHTML = message;
+}
+
+function resetCategoryBudgetPercents() {
+    categoryBudgetPercents = getDefaultCategoryBudgetPercents();
+    categoryWarningPercents = getDefaultCategoryWarningPercents();
+    renderCategoryBudgetInputs();
+    saveToLocalStorage();
+
+    if (hasAnalysisResult()) {
+        analyzeExpense();
+    }
 }
 
 function addExpense() {
@@ -80,6 +282,8 @@ function addExpense() {
     if (hasAnalysisResult()) {
         analyzeExpense();
     }
+
+    showCategoryBudgetPopupForCategory(category);
 }
 
 function clearInput() {
@@ -175,6 +379,8 @@ function analyzeExpense() {
         categoryText += `${escapeHTML(category)}：${categoryTotal[category]} 元，占 ${percent}%<br>`;
     }
 
+    const budgetCheck = getCategoryBudgetCheck(availableBudget, categoryTotal);
+
     let maxCategory = "無";
     let maxAmount = 0;
 
@@ -217,7 +423,11 @@ function analyzeExpense() {
 
     let extraAdvice = "";
 
-    if (unnecessaryRatio >= 40) {
+    if (budgetCheck.overBudgetCategories.length > 0) {
+        extraAdvice = `「${budgetCheck.overBudgetCategories.join("、")}」已超出分類預算，建議優先檢查這些項目。`;
+    } else if (budgetCheck.warningCategories.length > 0) {
+        extraAdvice = `「${budgetCheck.warningCategories.join("、")}」已達分類警示門檻，建議提早控制支出。`;
+    } else if (unnecessaryRatio >= 40) {
         extraAdvice = "非必要支出比例偏高，建議優先檢查娛樂、購物、飲料等項目。";
     } else if (unnecessaryRatio > 0) {
         extraAdvice = "非必要支出比例尚可，但仍可檢查是否有能減少的消費。";
@@ -240,6 +450,9 @@ function analyzeExpense() {
         <strong>分類統計：</strong><br>
         ${categoryText || "目前沒有消費資料"}<br>
 
+        <strong>分類預算執行情況：</strong><br>
+        ${budgetCheck.html || "尚未設定分類預算"}<br>
+
         <strong>系統建議：</strong><br>
         1. ${advice}<br>
         2. ${extraAdvice}<br>
@@ -249,10 +462,13 @@ function analyzeExpense() {
     updateBudgetBar(usedRatio);
     renderPieChart(categoryTotal, totalExpense);
 
+    const categoryWarningSummary = getCategoryWarningSummary(budgetCheck);
+
     document.getElementById("warningBox").innerHTML = `
         <div class="result-box ${statusClass}">
             預警狀態：${status}<br>
             ${advice}
+            ${categoryWarningSummary ? `<br>${categoryWarningSummary}` : ""}
         </div>
     `;
 
@@ -265,7 +481,8 @@ function analyzeExpense() {
         usedRatio,
         status,
         maxCategory,
-        remainingBudget
+        remainingBudget,
+        budgetCheck.text
     );
 
     saveToLocalStorage();
@@ -296,6 +513,92 @@ function getCategoryTotal() {
     });
 
     return categoryTotal;
+}
+
+function getCategoryBudgetCheck(availableBudget, categoryTotal) {
+    const percents = readCategoryBudgetInputs();
+    const warnings = readCategoryWarningInputs();
+    const rows = [];
+    const warningCategories = [];
+    const overBudgetCategories = [];
+
+    let html = "";
+    let text = "";
+    let totalPercent = 0;
+
+    budgetCategories.forEach(function (category) {
+        const percent = Number(percents[category]) || 0;
+        const warningPercent = Number(warnings[category]) || 80;
+        const budgetAmount = availableBudget > 0 ? Math.round(availableBudget * percent / 100) : 0;
+        const warningAmount = Math.round(budgetAmount * warningPercent / 100);
+        const spent = Number(categoryTotal[category]) || 0;
+        const remaining = budgetAmount - spent;
+        const usedPercent = budgetAmount > 0 ? spent / budgetAmount * 100 : 0;
+
+        totalPercent += percent;
+
+        if (percent > 0 || spent > 0) {
+            let status = "正常";
+
+            if (budgetAmount > 0 && spent > budgetAmount) {
+                status = "超出";
+                overBudgetCategories.push(category);
+            } else if (budgetAmount === 0 && spent > 0) {
+                status = "未分配預算但有支出";
+                overBudgetCategories.push(category);
+            } else if (budgetAmount > 0 && spent >= warningAmount && spent > 0) {
+                status = "注意";
+                warningCategories.push(category);
+            }
+
+            rows.push({
+                category: category,
+                percent: percent,
+                warningPercent: warningPercent,
+                budgetAmount: budgetAmount,
+                warningAmount: warningAmount,
+                spent: spent,
+                remaining: remaining,
+                usedPercent: usedPercent,
+                status: status
+            });
+        }
+    });
+
+    rows.forEach(function (row) {
+        const usedText = row.budgetAmount > 0 ? `${row.usedPercent.toFixed(1)}%` : "-";
+        let statusClass = "category-budget-normal";
+
+        if (row.status === "注意") {
+            statusClass = "category-budget-warning";
+        } else if (row.status !== "正常") {
+            statusClass = "category-budget-over";
+        }
+
+        html += `
+            <div class="category-budget-row ${statusClass}">
+                <div>
+                    <strong>${escapeHTML(row.category)}</strong>
+                    <span>${row.percent}%｜預算 ${row.budgetAmount} 元｜警示 ${row.warningAmount} 元｜已花 ${row.spent} 元｜剩餘 ${row.remaining} 元</span>
+                </div>
+                <b>${escapeHTML(row.status)}｜${usedText}</b>
+            </div>
+        `;
+
+        text += `${row.category}：設定 ${row.percent}%、預算 ${row.budgetAmount} 元、警示門檻 ${row.warningPercent}%（${row.warningAmount} 元）、已花 ${row.spent} 元、剩餘 ${row.remaining} 元、狀態 ${row.status}
+`;
+    });
+
+    text = `分類預算總比例：${totalPercent.toFixed(1)}%
+` + text;
+
+    return {
+        html: html,
+        text: text,
+        rows: rows,
+        warningCategories: warningCategories,
+        overBudgetCategories: overBudgetCategories
+    };
 }
 
 function renderPieChart(categoryTotal, totalExpense) {
@@ -402,7 +705,8 @@ function generateAIPrompt(
     usedRatio,
     status,
     maxCategory,
-    remainingBudget
+    remainingBudget,
+    categoryBudgetText
 ) {
     let expenseText = "";
 
@@ -411,7 +715,8 @@ function generateAIPrompt(
     });
 
     const prompt = `
-請用 300 字以內回答，分成 1. 消費狀況 2. 主要問題 3. 改善建議 三段即可。
+請你扮演個人消費分析師，根據以下記帳資料給我簡短、重點式分析。
+請控制在 150 字以內，不要開頭寒暄，不要寫太長。
 
 月份：${month}
 本月收入：${income} 元
@@ -423,21 +728,27 @@ function generateAIPrompt(
 最大支出分類：${maxCategory}
 剩餘預算：${remainingBudget} 元
 
+分類預算分配與執行情況：
+${categoryBudgetText || "尚未設定分類預算"}
+
 消費明細：
 ${expenseText}
 
-請幫我完成以下分析：
-1. 最大支出分類是什麼？
-2. 哪些支出可能是不必要支出？
-3. 我的消費習慣有什麼問題？
-4. 請給我三點具體改善建議。
-5. 如果我要避免下個月超支，應該怎麼設定預算？
+請只回答以下三點：
+1. 消費狀況：用一句話說明。
+2. 主要問題：指出是否有分類預算超支。
+3. 改善建議：列出 2 點即可。
     `;
 
     document.getElementById("aiPrompt").value = prompt.trim();
 }
 
 function saveToLocalStorage() {
+    if (document.getElementById("categoryBudgetGrid")) {
+        readCategoryBudgetInputs();
+        readCategoryWarningInputs();
+    }
+
     const data = {
         month: document.getElementById("month").value,
         income: document.getElementById("income").value,
@@ -445,6 +756,8 @@ function saveToLocalStorage() {
         safeLimit: document.getElementById("safeLimit").value,
         noticeLimit: document.getElementById("noticeLimit").value,
         warningLimit: document.getElementById("warningLimit").value,
+        categoryBudgetPercents: categoryBudgetPercents,
+        categoryWarningPercents: categoryWarningPercents,
         expenses: expenses
     };
 
@@ -467,6 +780,16 @@ function loadFromLocalStorage() {
     document.getElementById("noticeLimit").value = parsed.noticeLimit || 90;
     document.getElementById("warningLimit").value = parsed.warningLimit || 100;
 
+    categoryBudgetPercents = {
+        ...getDefaultCategoryBudgetPercents(),
+        ...(parsed.categoryBudgetPercents || {})
+    };
+
+    categoryWarningPercents = {
+        ...getDefaultCategoryWarningPercents(),
+        ...(parsed.categoryWarningPercents || {})
+    };
+
     expenses = parsed.expenses || [];
 }
 
@@ -478,6 +801,8 @@ function clearAll() {
     }
 
     expenses = [];
+    categoryBudgetPercents = getDefaultCategoryBudgetPercents();
+    categoryWarningPercents = getDefaultCategoryWarningPercents();
 
     localStorage.removeItem("budgetData");
 
@@ -487,12 +812,14 @@ function clearAll() {
     document.getElementById("analysisResult").innerHTML = "";
     document.getElementById("warningBox").innerHTML = "";
     document.getElementById("aiPrompt").value = "";
-    document.getElementById("geminiResult").innerHTML = "尚未產生 Gemini AI 分析結果。";
+    document.getElementById("geminiResult").innerHTML = "尚未產生 AI 分析結果。";
 
     const bar = document.getElementById("budgetBar");
     bar.style.width = "0%";
     bar.textContent = "0%";
 
+    closeCategoryAlertModal();
+    renderCategoryBudgetInputs();
     renderTable();
     renderPieChart({}, 0);
     setToday();
@@ -500,6 +827,78 @@ function clearAll() {
 
 function hasAnalysisResult() {
     return document.getElementById("analysisResult").innerHTML.trim() !== "";
+}
+
+function getCategoryWarningSummary(budgetCheck) {
+    if (budgetCheck.overBudgetCategories.length > 0) {
+        return `分類預算警示：${escapeHTML(budgetCheck.overBudgetCategories.join("、"))} 已超出分類預算。`;
+    }
+
+    if (budgetCheck.warningCategories.length > 0) {
+        return `分類預算提醒：${escapeHTML(budgetCheck.warningCategories.join("、"))} 已達警示門檻。`;
+    }
+
+    return "";
+}
+
+function getCategoryBudgetAlert(category) {
+    const availableBudget = Number(document.getElementById("availableBudget").value) || 0;
+
+    if (availableBudget <= 0) {
+        return null;
+    }
+
+    const categoryTotal = getCategoryTotal();
+    const budgetCheck = getCategoryBudgetCheck(availableBudget, categoryTotal);
+
+    return budgetCheck.rows.find(function (row) {
+        return row.category === category && row.status !== "正常";
+    }) || null;
+}
+
+function showCategoryBudgetPopupForCategory(category) {
+    const row = getCategoryBudgetAlert(category);
+
+    if (!row) {
+        return;
+    }
+
+    const modal = document.getElementById("categoryAlertModal");
+    const title = document.getElementById("categoryAlertTitle");
+    const content = document.getElementById("categoryAlertContent");
+
+    if (!modal || !title || !content) {
+        const message = row.status === "注意"
+            ? `${row.category} 已達分類預算警示門檻，目前已花 ${row.spent} 元，警示金額為 ${row.warningAmount} 元。`
+            : `${row.category} 已超出分類預算，目前已花 ${row.spent} 元，預算為 ${row.budgetAmount} 元。`;
+        alert(message);
+        return;
+    }
+
+    const isOver = row.status !== "注意";
+    title.textContent = isOver ? "分類預算超支提醒" : "分類預算注意提醒";
+    content.className = `modal-content ${isOver ? "modal-over" : "modal-warning"}`;
+    content.innerHTML = `
+        <p><strong>${escapeHTML(row.category)}</strong> 已${isOver ? "超出分類預算" : "達到警示門檻"}。</p>
+        <ul>
+            <li>設定比例：${row.percent}%</li>
+            <li>分類預算：${row.budgetAmount} 元</li>
+            <li>警示門檻：${row.warningPercent}%，約 ${row.warningAmount} 元</li>
+            <li>目前已花：${row.spent} 元</li>
+            <li>剩餘金額：${row.remaining} 元</li>
+        </ul>
+        <p>${isOver ? "建議先暫停或減少此分類支出。" : "建議接下來控制此分類支出，避免月底超支。"}</p>
+    `;
+
+    modal.classList.remove("hidden");
+}
+
+function closeCategoryAlertModal() {
+    const modal = document.getElementById("categoryAlertModal");
+
+    if (modal) {
+        modal.classList.add("hidden");
+    }
 }
 
 function escapeHTML(value) {
@@ -524,7 +923,7 @@ async function askGeminiAnalysis() {
         return;
     }
 
-    resultBox.innerHTML = "Gemini AI 分析中，請稍候...";
+    resultBox.innerHTML = "AI 分析中，請稍候...";
     button.disabled = true;
     button.textContent = "分析中...";
 
@@ -548,24 +947,24 @@ async function askGeminiAnalysis() {
         }
 
         if (!response.ok || data.error) {
-            throw new Error(data.error || "Gemini API 分析失敗");
+            throw new Error(data.error || "AI 分析失敗");
         }
 
         resultBox.innerHTML = formatAIText(data.result);
     } catch (error) {
         resultBox.innerHTML = `
             <div class="ai-error">
-                Gemini AI 分析失敗：${escapeHTML(error.message)}<br>
+                AI 分析失敗：${escapeHTML(error.message)}<br>
                 請確認：<br>
                 1. 已經建立 .env 並設定 GEMINI_API_KEY。<br>
                 2. 已經執行 node server.js。<br>
                 3. 網頁是透過 http://localhost:3000 開啟，不是直接雙擊 HTML。<br>
-                4. 電腦可以連上 Gemini API。
+                4. 電腦可以連上 AI API。
             </div>
         `;
     } finally {
         button.disabled = false;
-        button.textContent = "使用 Gemini API 產生 AI 分析";
+        button.textContent = "產生 AI 消費分析";
     }
 }
 

@@ -93,7 +93,7 @@ async function handleGeminiAnalyze(req, res) {
                 systemInstruction: {
                     parts: [
                         {
-                            text: "你是個人記帳與消費分析助理。請使用繁體中文回答。請控制在 150 字以內。不要開頭寒暄。不要解釋太多。請只分成三點回答：1. 消費狀況2. 主要問題3. 改善建議"
+                            text: "你是一位個人記帳與消費分析助理。請使用繁體中文，回答要簡短、直接、重點式，不要寒暄，不要超過 150 字。"
                         }
                     ]
                 },
@@ -104,8 +104,8 @@ async function handleGeminiAnalyze(req, res) {
                     }
                 ],
                 generationConfig: {
-                    temperature: 0.5,
-                    maxOutputTokens: 4096
+                    temperature: 0.4,
+                    maxOutputTokens: 400
                 }
             })
         });
@@ -117,31 +117,19 @@ async function handleGeminiAnalyze(req, res) {
             return sendJson(res, geminiResponse.status, { error: message });
         }
 
-    const candidate = data?.candidates?.[0];
-const finishReason = candidate?.finishReason || "";
+        const text = data?.candidates?.[0]?.content?.parts
+            ?.map(part => part.text || "")
+            .join("\n")
+            .trim();
 
-const text = candidate?.content?.parts
-    ?.map(part => part.text || "")
-    .join("\n")
-    .trim();
+        if (!text) {
+            return sendJson(res, 502, {
+                error: "Gemini API 沒有回傳文字內容。",
+                raw: data
+            });
+        }
 
-if (!text) {
-    return sendJson(res, 502, {
-        error: "Gemini API 沒有回傳文字內容。",
-        raw: data
-    });
-}
-
-let finalText = text;
-
-if (finishReason === "MAX_TOKENS") {
-    finalText += "\n\n提醒：本次 AI 回覆因輸出長度限制而被截斷，請提高 maxOutputTokens 或要求 AI 回答短一點。";
-}
-
-return sendJson(res, 200, {
-    result: finalText,
-    finishReason: finishReason
-});
+        return sendJson(res, 200, { result: text });
     } catch (error) {
         return sendJson(res, 500, { error: error.message || "伺服器發生未知錯誤。" });
     }
@@ -204,5 +192,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`記帳系統已啟動：http://localhost:${PORT}`);
+    console.log(`個人記帳與消費分析系統已啟動：http://localhost:${PORT}`);
 });

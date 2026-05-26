@@ -1,7 +1,7 @@
 {
-  "name": "budget-gemini-node",
+  "name": "personal-budget-analysis-system",
   "version": "1.0.0",
-  "description": "個人記帳與消費分析系統，使用 Node.js 後端代理 Gemini API。",
+  "description": "個人記帳與消費分析系統，使用 Node.js 後端代理 AI API。",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
