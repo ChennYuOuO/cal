@@ -44,55 +44,73 @@
 
                 <div>
                     <label>本月收入</label>
-                    <input type="number" id="income" placeholder="例如：30000">
+                    <input type="number" id="income" min="1" step="1" placeholder="例如：30000">
                 </div>
 
                 <div>
                     <label>固定支出</label>
-                    <input type="number" id="fixedExpense" placeholder="例如：10000">
+                    <input type="number" id="fixedExpense" min="0" step="1" placeholder="例如：10000">
                 </div>
 
                 <div>
                     <label>可用消費預算</label>
-                    <input type="number" id="availableBudget" readonly>
-                </div>
-            </div>
-
-            <h2>二、預警門檻設定</h2>
-
-            <div class="grid three-columns">
-                <div>
-                    <label>安全上限 (%)</label>
-                    <input type="number" id="safeLimit" value="70">
-                </div>
-
-                <div>
-                    <label>注意上限 (%)</label>
-                    <input type="number" id="noticeLimit" value="90">
-                </div>
-
-                <div>
-                    <label>警告上限 (%)</label>
-                    <input type="number" id="warningLimit" value="100">
+                    <input type="number" id="availableBudget" min="1" readonly>
                 </div>
             </div>
 
             <div class="button-group">
-                <button onclick="calculateBudget()">計算可用預算</button>
+                <button onclick="calculateBudget(true)">計算可用預算</button>
             </div>
         </section>
 
         <section id="budgetMenu" class="menu-section">
             <h2>預算分配</h2>
 
-            <p class="section-desc">可依照「可用消費預算」自行設定各分類的預算比例與警示門檻，系統會自動換算成金額，新增支出後若達到門檻會主動跳出提醒。</p>
+            <div class="budget-overview-card">
+                <div class="budget-overview-header">
+                    <div>
+                        <span class="overview-label">可用預算總額</span>
+                        <strong id="availableBudgetTotalText">0 元</strong>
+                    </div>
+                    <div class="overview-mini" id="allocationProgressText">已分配 0%</div>
+                </div>
+
+                <div class="allocation-progress-container">
+                    <div id="allocationProgressBar" class="allocation-progress-bar">0%</div>
+                </div>
+
+                <div id="allocationProgressDetail" class="allocation-progress-detail">已分配 0 元，剩餘 0 元。</div>
+            </div>
+
+            <h2>共用預警門檻設定</h2>
+
+            <p class="section-desc">總預算與各分類預算共用同一組預警門檻，不再另外設定每個分類的警示門檻。</p>
+
+            <div class="grid three-columns budget-threshold-grid">
+                <div>
+                    <label>安全上限 (%)</label>
+                    <input type="number" id="safeLimit" min="1" max="100" step="1" value="70" oninput="onBudgetThresholdInput()">
+                </div>
+
+                <div>
+                    <label>注意上限 (%)</label>
+                    <input type="number" id="noticeLimit" min="1" max="100" step="1" value="90" oninput="onBudgetThresholdInput()">
+                </div>
+
+                <div>
+                    <label>警告上限 (%)</label>
+                    <input type="number" id="warningLimit" min="1" max="100" step="1" value="100" oninput="onBudgetThresholdInput()">
+                </div>
+            </div>
+
+            <p class="section-desc">可依照「可用消費預算」直接輸入各分類要分配的金額，系統會依照上方共用門檻計算花到多少錢會出現注意、警告或超支提醒。</p>
 
             <div id="categoryBudgetGrid" class="category-budget-grid"></div>
 
             <div id="budgetPercentSummary" class="budget-percent-summary"></div>
 
             <div class="button-group">
-                <button onclick="resetCategoryBudgetPercents()" class="secondary-btn">重設為預設比例</button>
+                <button onclick="saveCategoryBudgetSettings()" class="secondary-btn">儲存預算比例</button>
             </div>
         </section>
 
@@ -102,22 +120,22 @@
             <div class="grid">
                 <div>
                     <label>日期</label>
-                    <input type="date" id="expenseDate">
+                    <input type="date" id="expenseDate" required>
                 </div>
 
                 <div>
-                    <label>消費項目</label>
-                    <input type="text" id="itemName" placeholder="例如：午餐、飲料、電影票">
+                    <label>消費項目 <span class="required-mark">*</span></label>
+                    <input type="text" id="itemName" placeholder="例如：午餐、飲料、電影票" required>
                 </div>
 
                 <div>
-                    <label>金額</label>
-                    <input type="number" id="amount" placeholder="例如：120">
+                    <label>消費金額 <span class="required-mark">*</span></label>
+                    <input type="number" id="amount" min="1" step="1" placeholder="例如：120" required>
                 </div>
 
                 <div>
                     <label>分類</label>
-                    <select id="category">
+                    <select id="category" required>
                         <option value="餐飲">餐飲</option>
                         <option value="交通">交通</option>
                         <option value="娛樂">娛樂</option>
@@ -125,13 +143,12 @@
                         <option value="學習">學習</option>
                         <option value="生活用品">生活用品</option>
                         <option value="醫療">醫療</option>
-                        <option value="其他">其他</option>
                     </select>
                 </div>
 
                 <div>
                     <label>支出類型</label>
-                    <select id="necessary">
+                    <select id="necessary" required>
                         <option value="必要">必要支出</option>
                         <option value="非必要">非必要支出</option>
                     </select>
@@ -216,11 +233,6 @@
                 尚未產生 AI 分析結果。
             </div>
 
-            <h2>AI 分析 Prompt 備用</h2>
-
-            <p>如果沒有設定 AI API，也可以把下面內容複製到 ChatGPT 或其他 AI 工具進行分析。</p>
-
-            <textarea id="aiPrompt" readonly></textarea>
         </section>
     </main>
 </div>
